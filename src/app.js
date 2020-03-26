@@ -18,6 +18,18 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+function validateBearerToken(req, res, next) {
+  
+  const apiToken = process.env.API_TOKEN;
+  const authToken = req.get('Authorization');
+
+  if (!authToken || authToken.split(' ')[1] !== apiToken) {
+    return res.status(401).json({ error: 'Unauthorized request' });
+  }
+  // move to the next middleware
+  next();
+}
+
 const people = [
   {
     id: uuid(),
@@ -44,6 +56,11 @@ const people = [
 app.get('/address', (req, res) => {
   res.json(people);
 });
+
+
+app.post('/address', validateBearerToken);
+app.delete('/address/:userId', validateBearerToken);
+
 
 app.post('/address', (req, res) => {
   
